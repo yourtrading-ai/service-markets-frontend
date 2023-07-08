@@ -1,0 +1,32 @@
+.navBar {
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(225, 225, 225, 0.35);
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+}
+
+.brandName {
+    font-size: 3rem;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: -webkit-linear-gradient(#76DB98, #5CC5A6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.brandNameDot {
+  font-size: 3rem;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(#91d7a8, #73bfa8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: rgb(154, 187, 165) 1px 0 12px;
+}

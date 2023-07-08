@@ -1,0 +1,8 @@
+.pageBody {
+  padding: 0 1rem;
+  flex-direction: column;
+}
+
+.addServiceButton {
+  background: linear-gradient(#76DB98, #339797);
+}
