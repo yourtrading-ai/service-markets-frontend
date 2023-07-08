@@ -15,8 +15,10 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/fira-mono": "^5.0.4",
     "@fontsource/oxygen-mono": "^5.0.4",
-    "@requestnetwork/request-client.js": "^0.40.1-next.1907",
-    "@requestnetwork/web3-signature": "^0.4.37-next.1907",
+    "@rainbow-me/rainbowkit": "^1.0.5",
+    "@requestnetwork/payment-processor": "^0.38.0",
+    "@requestnetwork/request-client.js": "^0.40.0",
+    "@requestnetwork/web3-signature": "^0.4.36",
     "@types/node": "20.4.0",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
@@ -30,7 +32,7 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
     "typescript": "5.1.6",
-    "viem": "^1.2.11",
+    "viem": "^0.3.35",
     "wagmi": "^1.3.8"
   }
 }

@@ -30,7 +30,7 @@ export default function Navbar() {
     const { address, isConnected } = useAccount()
     const ensName = useEnsName(address)
     const { connect } = useConnect({
-      connector: new InjectedConnector(),
+      connector: new InjectedConnector({ chains:['goerli'] }),
     })
     const { disconnect } = useDisconnect()
 
@@ -65,14 +65,7 @@ export default function Navbar() {
                             address ? (
                                 <>
                                     <MenuItem>
-                                        Signed in as:
-                                        {
-                                            ensName ? (
-                                                <span>{ensName}</span>
-                                            ) : (
-                                                `${address.substring(0,4)}...${address.substring(address.length-4, address.length)}`
-                                            )
-                                        }
+                                        Signed in as: `${address.substring(0,4)}...${address.substring(address.length-4, address.length)}`
                                     </MenuItem>
                                     <MenuItem onClick={() => disconnect()}>Sign Out</MenuItem>
                                 </>

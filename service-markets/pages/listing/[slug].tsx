@@ -10,6 +10,10 @@ import { mockListings, mockComments } from "@/utils";
 import { useEffect, useState } from "react";
 import { postMethod, getMethod, putMethod} from '@/utils'
 import { useAccount } from 'wagmi'
+import { RequestNetwork } from "@requestnetwork/request-client.js";
+import { Web3SignatureProvider } from "@requestnetwork/web3-signature";
+import { useWalletClient } from "wagmi";
+import { Types, Utils } from "@requestnetwork/request-client.js";
 
 export default function Listing() {
     const router = useRouter();
@@ -19,7 +23,8 @@ export default function Listing() {
     const [inputComment, setInputComment] = useState("");
     const toast = useToast();
     const { address, isConnecting, isDisconnected, isConnected } = useAccount()
-
+    const { data: walletClient } = useWalletClient();
+    
     useEffect(() => {
         if (slug != undefined) {
             getMethod.allListings().then((res) => {
@@ -39,11 +44,64 @@ export default function Listing() {
             getMethod.comments(listingData.item_hash).then((res) => {
                 setComments(res);
             })
-            console.log(listingData);
         }
     }, [listingData]);
 
-    const buyService = () => {
+    const buyService = async () => {
+        const signatureProvider = new Web3SignatureProvider(walletClient);
+        console.log(walletClient?.account.address)
+        const requestClient = new RequestNetwork({
+            nodeConnectionConfig: { 
+                baseURL: "https://goerli.gateway.request.network/",
+            },
+            signatureProvider,
+        });
+
+        const payeeAddress = '0x91313eb16bb6fa6237E191670Bf953309639A028';
+        const payerAddress = '0xda0ee0a4296050503dE4c67321C6A3ABaBb3078A';
+        const zeroAddress = '0x0000000000000000000000000000000000000000';
+
+        const requestCreateParameters: Types.ICreateRequestParameters = {
+          requestInfo: {
+            currency: {
+              type: Types.RequestLogic.CURRENCY.ETH,
+              value: zeroAddress,
+              network: 'goerli',
+            },
+            expectedAmount: 1234567,
+            payee: {
+              type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+              value: payeeAddress,
+            },
+            payer: {
+              type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+              value: payerAddress,
+            },
+            timestamp: Utils.getCurrentTimestampInSecond(),
+          },
+          paymentNetwork: {
+            id: Types.Extension.PAYMENT_NETWORK_ID.ETH_INPUT_DATA,
+            parameters: {
+              paymentNetworkName: 'goerli',
+              paymentAddress: payeeAddress
+            },
+          },
+          contentData: {
+            // Tip: Consider using rnf_invoice v0.0.3 format from @requestnetwork/data-format
+            reason: '🍕',
+            dueDate: '2023.06.16',
+          },
+          signer: {
+            type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+            value: payeeAddress,
+          },
+        };
+
+        console.log(requestClient)
+        const request = await requestClient.createRequest(requestCreateParameters);
+        const confirmedRequest = await request.waitForConfirmation();
+        const requestData = request.getData();
+
         toast({
             title: "Service Purchased",
             description: "You have successfully purchased this service",
@@ -51,7 +109,7 @@ export default function Listing() {
             duration: 9000,
             isClosable: true,
         })
-    }
+    } 
 
     const manageComment = () => {
         if (inputComment != "") {
@@ -105,10 +163,10 @@ export default function Listing() {
     return (
         <>
             <Head>
-            <title>{slug}</title>
-            <meta name="description" content="A Marketplace for all your service needs" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <link rel="icon" href="/favicon.ico" />
+                <title>{slug}</title>
+                <meta name="description" content="A Marketplace for all your service needs" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <link rel="icon" href="/favicon.ico" />
             </Head>
             <Flex className={styles.pageBody}>  
                 <div>
