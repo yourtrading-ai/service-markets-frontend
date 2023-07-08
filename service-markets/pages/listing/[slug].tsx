@@ -116,7 +116,7 @@ export default function Listing() {
                         listingData.name ? (
                             <Box>
                                  <Stack direction="row" spacing="8" px={4}>
-                                    <Image src={listingData.image_url == "" ? "../skeletonImage.jpg" : listingData.image_url} alt={listingData.name} width={700}/>
+                                    <Image src={listingData.image_url ? "../skeletonImage.jpg" : listingData.image_url} alt={listingData.name} width={700}/>
                                     <Flex direction="column" gap="4">
                                         <Flex>
                                             <Heading as="h3" size="xl">{listingData.name}</Heading>
