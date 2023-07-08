@@ -16,6 +16,7 @@
     background: -webkit-linear-gradient(#76DB98, #5CC5A6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    padding: 0 1px;
 }
 
 .brandNameDot {
@@ -29,4 +30,5 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: rgb(154, 187, 165) 1px 0 12px;
+
 }

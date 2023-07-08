@@ -1,6 +1,15 @@
 import { mockListings, mockComments } from "./mockData";
+import { colorSchemes, getRandomColorScheme } from "./colorSchemes";
+import { getMethod } from "./get";
+import { postMethod } from "./post";
+import { putMethod } from "./put";
 
 export {
     mockListings,
-    mockComments
+    mockComments,
+    colorSchemes,
+    getRandomColorScheme,
+    getMethod,
+    postMethod,
+    putMethod
 }

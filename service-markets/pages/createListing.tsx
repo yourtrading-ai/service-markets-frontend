@@ -4,14 +4,18 @@ import { Box, Text, Button, Flex, Heading, Stack, FormControl, FormLabel, Input,
 import '@fontsource/fira-mono'
 import '@fontsource/oxygen-mono'
 import { useEffect, useState } from 'react'
+import { getRandomColorScheme, putMethod } from '@/utils'
+import { useAccount } from 'wagmi'
 
 export default function Home() {
+    const { address, isConnecting, isDisconnected, isConnected } = useAccount()
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        image: "",
+        image_url: "",
         url: "",
         tags: [],
+        owner_address: "",
         price: 0
     })
     const [tags, setTags] = useState([] as string[]);
@@ -29,6 +33,12 @@ export default function Home() {
     }
 
     useEffect(() => {
+        if (isConnected) {
+            setFormData({...formData, owner_address:address});
+        }
+    }, [isConnecting, isDisconnected, isConnected, address])
+
+    useEffect(() => {
         console.log(image);
     }, [image])
 
@@ -36,8 +46,10 @@ export default function Home() {
         setFormData({...formData, tags:tags});
     }, [tags])
 
-    const submitForm = () => {
-        console.log(formData);
+    const submitForm = async () => {
+        putMethod.updateListing(formData).then((res) => {
+            console.log(res);
+        })
     }
 
     return (
@@ -93,7 +105,7 @@ export default function Home() {
                         <Flex border='1px solid #E0E1E7' alignItems='center' wrap='wrap' borderRadius='md'>
                             {tags.map((tag, index) => {
                                 return (
-                                    <Tag key={index} size='lg' m={2} colorScheme="teal">
+                                    <Tag key={index} size='lg' m={2} colorScheme={getRandomColorScheme()}>
                                         {tag}
                                     </Tag>
                                 )

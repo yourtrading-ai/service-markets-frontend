@@ -6,11 +6,21 @@ import '@fontsource/oxygen-mono'
 import { Listing } from '@/components'
 import { mockListings } from '@/utils'
 import { useRouter } from 'next/router'
+import { getMethod } from '@/utils'
+import { useEffect, useState } from 'react'
 
 const Listings = mockListings
 
 export default function Home() {
   const router = useRouter()
+
+  const [listings, setListings] = useState([] as any[]);
+
+  useEffect(() => {
+    getMethod.allListings().then((res) => {
+      setListings(res);
+    })
+  }, [])
 
   return (
     <>
@@ -26,7 +36,7 @@ export default function Home() {
               
             </GridItem>
             <GridItem w="100%" display="flex" alignItems="center">
-              <Button font="subtitle" fontSize="30" py="7" fontWeight="900" bgGradient="linear(to-r, #76DB98, #339797)" onClick={() => router.push("/createListing")}>
+              <Button fontSize="30" py="7" fontWeight="900" bgGradient="linear(to-r, #76DB98, #339797)" onClick={() => router.push("/createListing")}>
                 <Text>Add Service</Text>
               </Button>
             </GridItem>
@@ -37,7 +47,7 @@ export default function Home() {
               <Heading as="h4">Services</Heading>
             </Box>
             <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)"}} templateRows="repeat(2, 1fr)" my="6" gap="10">
-              {Listings.map((listing, index) => {
+              {listings.map((listing, index) => {
                   return (
                     <GridItem key={index}>
                       <Listing {...listing}/>

@@ -1,6 +1,9 @@
 import type { AppProps } from 'next/app'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { Layout } from '@/components'
+import { WagmiConfig, createConfig, configureChains, mainnet } from 'wagmi'
+import { publicProvider } from 'wagmi/providers/public'
+import { goerli } from 'wagmi/chains'
 
 const theme = extendTheme({
   styles: {
@@ -18,13 +21,26 @@ const theme = extendTheme({
   },
 })
 
+const { chains, publicClient, webSocketPublicClient } = configureChains(
+  [goerli],
+  [publicProvider()],
+)
+
+const config = createConfig({
+  autoConnect: true,
+  publicClient,
+  webSocketPublicClient,
+})
+
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider theme={theme}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </ChakraProvider>
+    <WagmiConfig config={config}>
+      <ChakraProvider theme={theme}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </ChakraProvider>
+    </WagmiConfig>
   )
 }
 

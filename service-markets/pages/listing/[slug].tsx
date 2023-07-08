@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import styles from '@/styles/ListingPage.module.css'
-import { Box, Text, Button, Flex, Heading, Stack, useToast } from '@chakra-ui/react'
+import { Box, Text, Button, Flex, Heading, Stack, useToast, Tag, Input } from '@chakra-ui/react'
 import '@fontsource/fira-mono'
 import '@fontsource/oxygen-mono'
 import localFont from 'next/font/local'
@@ -8,11 +8,13 @@ import { UserIcon, ArrowUpIcon, ArrowDownIcon, MessageIcon } from '@/icons'
 import { useRouter } from "next/router";
 import { mockListings, mockComments } from "@/utils";
 import { useEffect, useState } from "react";
+import { postMethod } from '@/utils'
 
 export default function Listing() {
     const router = useRouter();
     const { slug } = router.query;
     const [listingData, setListingData] = useState({} as any);
+    const [comment, setComment] = useState("");
     const toast = useToast();
 
     useEffect(() => {
@@ -33,6 +35,10 @@ export default function Listing() {
         })
     }
 
+    const manageComment = () => {
+        console.log(comment);
+    }
+
     return (
         <>
             <Head>
@@ -46,23 +52,34 @@ export default function Listing() {
                     {
                         listingData.name ? (
                             <Box>
-                                 <Stack direction="row" spacing="8">
+                                 <Stack direction="row" spacing="8" px={4}>
                                     <img src={listingData.image} alt={listingData.name} width={700}/>
                                     <Flex direction="column" gap="4">
-                                        <Heading as="h3" size="xl">{listingData.name}</Heading>
+                                        <Flex>
+                                            <Heading as="h3" size="xl">{listingData.name}</Heading>
+                                            <Flex gap="4" ml="10">
+                                                {
+                                                    listingData.tags.map((tag:string, index:number) => {
+                                                        return (
+                                                            <Tag key={index} colorScheme="teal" color="black" size="sm" px="4">{tag}</Tag>
+                                                        )
+                                                    })
+                                                }
+                                            </Flex>
+                                        </Flex>
                                         <Flex gap="4">
-                                            <Flex gap="1">
+                                            <Flex gap="1" as={Button} bg="green.500" color="white">
                                                 <ArrowUpIcon size={20} extraStyles={{color:"white"}}/>
                                                 <span>{listingData.upvotes}</span>
                                             </Flex>
-                                            <Flex gap="1">
+                                            <Flex gap="1" as={Button} bg="red.500" color="white">
                                                 <ArrowDownIcon size={20} extraStyles={{color:"white"}}/>
                                                 <span>{listingData.downvotes}</span>
                                             </Flex>
-                                            <Flex gap="1">
+                                            {/* <Flex gap="1">
                                                 <MessageIcon size={20} extraStyles={{color:"white"}}/>
                                                 <span>{listingData.comments}</span>
-                                            </Flex>
+                                            </Flex> */}
                                         </Flex>
                                         <p>{listingData.description}</p>
                                         <Flex gap="8" alignItems="center">
@@ -76,7 +93,13 @@ export default function Listing() {
                                     </Flex>
                                 </Stack>
                                 <Stack direction="column" spacing="8" p="8">
-                                    <Heading as="h3" size="lg">Comments</Heading>
+                                    <Heading as="h3" size="lg">Comments {`(${listingData.comments})`}</Heading>
+                                    <Flex gap={1}>
+                                        <Input placeholder="Comment" type="text" onChange={(e:Event)=>setComment(e.target.value)}/>
+                                        <Button onClick={()=>manageComment()}>
+                                            Post
+                                        </Button>
+                                    </Flex>
                                     {
                                         mockComments.map((comment, index) => {
                                             return (

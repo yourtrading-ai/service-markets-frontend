@@ -7,7 +7,8 @@ export const mockListings = [
         price: 100,
         upvotes: 10,
         downvotes: 2,
-        comments: 4
+        comments: 4,
+        tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8', 'tag9']
       },
       {
         name: 'Service 2',
@@ -17,7 +18,8 @@ export const mockListings = [
         price: 200,
         upvotes: 20,
         downvotes: 4,
-        comments: 8
+        comments: 8,
+        tags: ['tag1', 'tag2', 'tag3']
       },
       {
         name: 'Service 3',
@@ -27,7 +29,8 @@ export const mockListings = [
         price: 300,
         upvotes: 30,
         downvotes: 6,
-        comments: 12
+        comments: 12,
+        tags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8']
       },
       {
         name: 'Service 4',
@@ -37,7 +40,8 @@ export const mockListings = [
         price: 400,
         upvotes: 40,
         downvotes: 8,
-        comments: 16
+        comments: 16,
+        tags: ['tag1', 'tag2', 'tag3']
       },
       {
         name: 'Service 5',
@@ -47,7 +51,8 @@ export const mockListings = [
         price: 500,
         upvotes: 50,
         downvotes: 10,
-        comments: 20
+        comments: 20,
+        tags: ['tag1', 'tag2', 'tag3']
       },
       {
         name: 'Service 6',
@@ -57,7 +62,8 @@ export const mockListings = [
         price: 600,
         upvotes: 60,
         downvotes: 12,
-        comments: 24
+        comments: 24,
+        tags: ['tag1', 'tag2', 'tag3']
       },
 ]
 
