@@ -15,6 +15,8 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/fira-mono": "^5.0.4",
     "@fontsource/oxygen-mono": "^5.0.4",
+    "@requestnetwork/request-client.js": "^0.40.1-next.1907",
+    "@requestnetwork/web3-signature": "^0.4.37-next.1907",
     "@types/node": "20.4.0",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",

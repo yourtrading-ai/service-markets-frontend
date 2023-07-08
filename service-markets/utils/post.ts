@@ -8,14 +8,8 @@ const Post = async (url:string, data:string) => {
 }
 
 export const postMethod = {
-    createListing: (data:string) => {
-        return Post('/api/createListing', data)
-    },
-    createComment: (id:string, data:string) => {
-        return Post('/api/createComment', data)
-    },
-    createVote: (id:string, data:string, type:string) => {
-        return Post(`/api/createVote/${type}`, data)
+    createComment: (id:string, address:string, data:string) => {
+        return Post(`http://localhost:8000/services/${id}/comments?comment=${data}&user_address=${address}`, '')
     }
 }
 

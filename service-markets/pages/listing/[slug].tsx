@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import styles from '@/styles/ListingPage.module.css'
-import { Box, Text, Button, Flex, Heading, Stack, useToast, Tag, Input } from '@chakra-ui/react'
+import { Box, Text, Button, Flex, Heading, Stack, useToast, Tag, Input, Image } from '@chakra-ui/react'
 import '@fontsource/fira-mono'
 import '@fontsource/oxygen-mono'
 import localFont from 'next/font/local'
@@ -8,22 +8,40 @@ import { UserIcon, ArrowUpIcon, ArrowDownIcon, MessageIcon } from '@/icons'
 import { useRouter } from "next/router";
 import { mockListings, mockComments } from "@/utils";
 import { useEffect, useState } from "react";
-import { postMethod } from '@/utils'
+import { postMethod, getMethod, putMethod} from '@/utils'
+import { useAccount } from 'wagmi'
 
 export default function Listing() {
     const router = useRouter();
     const { slug } = router.query;
     const [listingData, setListingData] = useState({} as any);
-    const [comment, setComment] = useState("");
+    const [comments, setComments] = useState([] as any[]);
+    const [inputComment, setInputComment] = useState("");
     const toast = useToast();
+    const { address, isConnecting, isDisconnected, isConnected } = useAccount()
 
     useEffect(() => {
-        mockListings.forEach(element => {
-            if (element.name === slug) {
-                setListingData(element);
-            }
-        });
+        if (slug != undefined) {
+            getMethod.allListings().then((res) => {
+                res.forEach((listing:any) => {
+                    if (listing.item_hash == slug) {
+                        setListingData(listing);
+                    } else if (listing.name == slug) {
+                        setListingData(listing);
+                    }
+                })
+            })
+        }
     }, [slug]);
+
+    useEffect(() => {
+        if (listingData.item_hash != undefined) {
+            getMethod.comments(listingData.item_hash).then((res) => {
+                setComments(res);
+            })
+            console.log(listingData);
+        }
+    }, [listingData]);
 
     const buyService = () => {
         toast({
@@ -36,8 +54,53 @@ export default function Listing() {
     }
 
     const manageComment = () => {
-        console.log(comment);
+        if (inputComment != "") {
+            postMethod.createComment(listingData.item_hash, address, inputComment).then((res) => {
+                toast({
+                    title: "Comment Posted",
+                    description: "Your comment has been posted",
+                    status: "success",
+                    duration: 2000,
+                    isClosable: true,
+                    onCloseComplete: () => {
+                        router.reload();
+                    }
+                })
+                setInputComment("");
+            })
+        }
     }
+
+    const serviceVote = (vote:string) => {
+        putMethod.voteService(listingData.item_hash, address, vote).then((res) => {
+            toast({
+                title: "Vote Submitted",
+                description: "Your vote has been submitted",
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+                onCloseComplete: () => {
+                    router.reload();
+                }
+            })
+        })
+    }
+
+    const commentVote = (commentHash:string, vote:string) => {
+        putMethod.voteComment(listingData.item_hash, commentHash, address, vote).then((res) => {
+            toast({
+                title: "Vote Submitted",
+                description: "Your vote has been submitted",
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+                onCloseComplete: () => {
+                    router.reload();
+                }
+            })
+        })
+    }
+
 
     return (
         <>
@@ -53,7 +116,7 @@ export default function Listing() {
                         listingData.name ? (
                             <Box>
                                  <Stack direction="row" spacing="8" px={4}>
-                                    <img src={listingData.image} alt={listingData.name} width={700}/>
+                                    <Image src={listingData.image_url == "" ? "../skeletonImage.jpg" : listingData.image_url} alt={listingData.name} width={700}/>
                                     <Flex direction="column" gap="4">
                                         <Flex>
                                             <Heading as="h3" size="xl">{listingData.name}</Heading>
@@ -68,11 +131,11 @@ export default function Listing() {
                                             </Flex>
                                         </Flex>
                                         <Flex gap="4">
-                                            <Flex gap="1" as={Button} bg="green.500" color="white">
+                                            <Flex gap="1" as={Button} bg="green.500" color="white" onClick={()=>serviceVote("up")}>
                                                 <ArrowUpIcon size={20} extraStyles={{color:"white"}}/>
                                                 <span>{listingData.upvotes}</span>
                                             </Flex>
-                                            <Flex gap="1" as={Button} bg="red.500" color="white">
+                                            <Flex gap="1" as={Button} bg="red.500" color="white" onClick={()=>serviceVote("down")}>
                                                 <ArrowDownIcon size={20} extraStyles={{color:"white"}}/>
                                                 <span>{listingData.downvotes}</span>
                                             </Flex>
@@ -93,28 +156,28 @@ export default function Listing() {
                                     </Flex>
                                 </Stack>
                                 <Stack direction="column" spacing="8" p="8">
-                                    <Heading as="h3" size="lg">Comments {`(${listingData.comments})`}</Heading>
+                                    <Heading as="h3" size="lg">Comments {`(${listingData.comment_counter})`}</Heading>
                                     <Flex gap={1}>
-                                        <Input placeholder="Comment" type="text" onChange={(e:Event)=>setComment(e.target.value)}/>
+                                        <Input placeholder="Comment" type="text" onChange={(e:Event)=>setInputComment(e.target.value)}/>
                                         <Button onClick={()=>manageComment()}>
                                             Post
                                         </Button>
                                     </Flex>
                                     {
-                                        mockComments.map((comment, index) => {
+                                        comments.map((comment, index) => {
                                             return (
                                                 <Box key={index} p={5} shadow='md' borderWidth='1px' w="50%">
                                                     <Flex direction="row" gap="4">
                                                         <UserIcon size={20} extraStyles={{color:"white"}}/>
-                                                        <Heading size="md">{comment.author}</Heading>
+                                                        <Heading size="md">{`${comment.user_address.substring(0,4)}...${comment.user_address.substring(comment.user_address.length-4, comment.user_address.length)}`}</Heading>
                                                     </Flex>
                                                     <Text>{comment.comment}</Text>
                                                     <Flex gap="4" mt="4">
-                                                        <Flex gap="1">
+                                                        <Flex gap="1" onClick={()=>commentVote(comment.item_hash, "up")}>
                                                             <ArrowUpIcon size={20} extraStyles={{color:"white"}}/>
                                                             <span>{comment.upvotes}</span>
                                                         </Flex>
-                                                        <Flex gap="1">
+                                                        <Flex gap="1" onClick={()=>commentVote(comment.item_hash, "down")}>
                                                             <ArrowDownIcon size={20} extraStyles={{color:"white"}}/>
                                                             <span>{comment.downvotes}</span>
                                                         </Flex>

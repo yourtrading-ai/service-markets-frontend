@@ -11,10 +11,10 @@ export const putMethod = {
     updateListing: (data: any) => {
         return PUT(`http://localhost:8000/services`, data)
     },
-    voteService: (id: string, data: any, vote:number) => {
-        return PUT(`http://localhost:8000/services/${id}/vote?user_address=${data.owner_address}&vote=${vote}`, data)
+    voteService: (id: string, user: any, vote:string) => {
+        return PUT(`http://localhost:8000/services/${id}/vote?user_address=${user}&vote=${vote}`, "")
     },
-    voteComment: (id: string, commentId: string, data: any, vote:number) => {
-        return PUT(`http://localhost:8000/services/${id}/comments/${commentId}/vote?user_address=${data.owner_address}&vote=${vote}`, data)
+    voteComment: (id: string, commentId: string, user: any, vote:string) => {
+        return PUT(`http://localhost:8000/services/${id}/comments/${commentId}/vote?user_address=${user}&vote=${vote}`, "")
     }
 }

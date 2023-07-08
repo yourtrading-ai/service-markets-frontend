@@ -1,13 +1,16 @@
 import Head from 'next/head'
 import styles from '@/styles/ListingPage.module.css'
-import { Box, Text, Button, Flex, Heading, Stack, FormControl, FormLabel, Input, InputRightAddon, InputGroup, Tag } from '@chakra-ui/react'
+import { Box, Text, Button, Flex, Heading, Stack, FormControl, FormLabel, Input, InputRightAddon, InputGroup, Tag, useToast} from '@chakra-ui/react'
 import '@fontsource/fira-mono'
 import '@fontsource/oxygen-mono'
 import { useEffect, useState } from 'react'
 import { getRandomColorScheme, putMethod } from '@/utils'
 import { useAccount } from 'wagmi'
+import { useRouter } from 'next/router'
 
 export default function Home() {
+    const router = useRouter()
+    const toast = useToast()
     const { address, isConnecting, isDisconnected, isConnected } = useAccount()
     const [formData, setFormData] = useState({
         name: "",
@@ -49,6 +52,23 @@ export default function Home() {
     const submitForm = async () => {
         putMethod.updateListing(formData).then((res) => {
             console.log(res);
+            toast({
+                title: "Listing Created",
+                description: "Your listing has been created",
+                status: "success",
+                duration: 9000,
+                isClosable: true,
+            })
+            router.push(`/listing/${formData.name}`);
+        }).catch((err) => {
+            toast({
+                title: "Failed to Create Listing",
+                description: "An error occured while creating your listing",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            })
+            return;
         })
     }
 

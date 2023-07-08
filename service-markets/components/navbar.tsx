@@ -28,7 +28,7 @@ const nothing = localFont({ src: '../public/fonts/Nothing/nothing.ttf' })
 export default function Navbar() {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { address, isConnected } = useAccount()
-    const { data: ensName } = useEnsName({ address })
+    const ensName = useEnsName(address)
     const { connect } = useConnect({
       connector: new InjectedConnector(),
     })
@@ -64,7 +64,16 @@ export default function Navbar() {
                         {
                             address ? (
                                 <>
-                                    <MenuItem>Signed in as: {address.substring(0,4)}...{address.substring(address.length-4, address.length)}</MenuItem>
+                                    <MenuItem>
+                                        Signed in as:
+                                        {
+                                            ensName ? (
+                                                <span>{ensName}</span>
+                                            ) : (
+                                                `${address.substring(0,4)}...${address.substring(address.length-4, address.length)}`
+                                            )
+                                        }
+                                    </MenuItem>
                                     <MenuItem onClick={() => disconnect()}>Sign Out</MenuItem>
                                 </>
                             ) : (

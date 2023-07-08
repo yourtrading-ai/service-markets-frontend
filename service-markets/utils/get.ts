@@ -1,5 +1,8 @@
 const Get = async (url:string) => {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
     return await response.json();
 }
 
@@ -8,14 +11,10 @@ export const getMethod = {
         return Get('http://localhost:8000/services')
     },
     listing: (id:string) => {
-        return Get(`/api/listing/${id}`)
+        return Get(`http://localhost:8000/services/${id}`)
     },
     comments: (id:string) => {
-        return Get(`/api/comments/${id}`)
-    },
-    votes: (id:string) => {
-        return Get(`/api/votes/${id}`)
+        return Get(`http://localhost:8000/services/${id}/comments`)
     }
-
 }
 
