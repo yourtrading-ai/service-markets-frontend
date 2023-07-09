@@ -95,14 +95,14 @@ export default function Navbar() {
     useEffect(() => {
         connect()
         if (isConnected) {
-            postMethod.challenge(address, "ETH").then((res) => {
+            postMethod.challenge(address.toString(), "ETH").then((res) => {
                 setChallenge(res.challenge)
             })
         }
     }, [isConnected, address])
 
     const {signMessage} = useSignMessage({ message: challenge, onSuccess(data, variables, context) {
-        postMethod.solve(address, "ETH", data).then((res) => {
+        postMethod.solve(address.toString(), "ETH", data).then((res) => {
             if (res) {
                 cookies.set("bearerToken", res.token, {path: "/", maxAge: res.valid_til})
                 console.log(cookies.get("bearerToken"))
@@ -111,7 +111,7 @@ export default function Navbar() {
     },})
 
     useEffect(() => {
-        if (challenge && !cookies.get("bearerToken")) {
+        if (challenge) {
             signMessage()
         }
     }, [challenge])

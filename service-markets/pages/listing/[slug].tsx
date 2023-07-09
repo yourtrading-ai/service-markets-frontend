@@ -111,7 +111,7 @@ export default function Listing() {
         }
         console.log(requestData)
         const tx = await payRequest(requestData);
-        await postMethod.validateTransaction(tx.hash, listingData.item_hash);
+        await putMethod.validateTransaction(tx.hash, listingData.item_hash);
         toast({
             title: "Service Purchased",
             description: "You have successfully purchased this service",
@@ -123,7 +123,7 @@ export default function Listing() {
 
     const manageComment = () => {
         if (inputComment != "") {
-            postMethod.createComment(listingData.item_hash, address, inputComment).then((res) => {
+            postMethod.createComment(listingData.item_hash, address.toString(), inputComment).then((res) => {
                 toast({
                     title: "Comment Posted",
                     description: "Your comment has been posted",

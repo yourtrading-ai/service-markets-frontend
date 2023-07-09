@@ -26,5 +26,8 @@ export const putMethod = {
     },
     voteComment: (id: string, commentId: string, user: any, vote:string) => {
         return PUT(API_URL + `/services/${id}/comments/${commentId}/vote?user_address=${user}&vote=${vote}`, "")
+    },
+    validateTransaction: (txnHash: string, serviceId: string) => {
+        return PUT(API_URL + `/services/${serviceId}/payment/${txnHash}`, "")
     }
 }
