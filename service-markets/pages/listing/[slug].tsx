@@ -14,6 +14,12 @@ import { RequestNetwork } from "@requestnetwork/request-client.js";
 import { Web3SignatureProvider } from "@requestnetwork/web3-signature";
 import { useWalletClient } from "wagmi";
 import { Types, Utils } from "@requestnetwork/request-client.js";
+import {
+    approveErc20,
+    hasErc20Approval,
+    hasSufficientFunds,
+    payRequest,
+} from '@requestnetwork/payment-processor';
 
 export default function Listing() {
     const router = useRouter();
@@ -24,7 +30,7 @@ export default function Listing() {
     const toast = useToast();
     const { address, isConnecting, isDisconnected, isConnected } = useAccount()
     const { data: walletClient } = useWalletClient();
-    
+
     useEffect(() => {
         if (slug != undefined) {
             getMethod.allListings().then((res) => {
@@ -49,59 +55,63 @@ export default function Listing() {
 
     const buyService = async () => {
         const signatureProvider = new Web3SignatureProvider(walletClient);
-        console.log(walletClient?.account.address)
         const requestClient = new RequestNetwork({
             nodeConnectionConfig: { 
                 baseURL: "https://goerli.gateway.request.network/",
             },
             signatureProvider,
         });
-
-        const payeeAddress = '0x91313eb16bb6fa6237E191670Bf953309639A028';
-        const payerAddress = '0xda0ee0a4296050503dE4c67321C6A3ABaBb3078A';
         const zeroAddress = '0x0000000000000000000000000000000000000000';
-
+        const payeeAddress = '0x91313eb16bb6fa6237E191670Bf953309639A028';
         const requestCreateParameters: Types.ICreateRequestParameters = {
           requestInfo: {
             currency: {
-              type: Types.RequestLogic.CURRENCY.ETH,
-              value: zeroAddress,
+              type: Types.RequestLogic.CURRENCY.ERC20,
+              value: '0xBA62BCfcAaFc6622853cca2BE6Ac7d845BC0f2Dc',
               network: 'goerli',
             },
-            expectedAmount: 1234567,
+            expectedAmount: listingData.price,
             payee: {
               type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
               value: payeeAddress,
             },
             payer: {
               type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
-              value: payerAddress,
+              value: walletClient?.account.address || '',
             },
             timestamp: Utils.getCurrentTimestampInSecond(),
           },
           paymentNetwork: {
-            id: Types.Extension.PAYMENT_NETWORK_ID.ETH_INPUT_DATA,
+            id: Types.Extension.PAYMENT_NETWORK_ID.ERC20_FEE_PROXY_CONTRACT,
             parameters: {
               paymentNetworkName: 'goerli',
-              paymentAddress: payeeAddress
+              paymentAddress: payeeAddress,
+              feeAddress: zeroAddress,  
+              feeAmount: '0',
             },
           },
           contentData: {
-            // Tip: Consider using rnf_invoice v0.0.3 format from @requestnetwork/data-format
-            reason: '🍕',
-            dueDate: '2023.06.16',
+            reason: listingData.item_hash,
           },
           signer: {
             type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
-            value: payeeAddress,
+            value: walletClient?.account.address || '',
           },
         };
 
-        console.log(requestClient)
         const request = await requestClient.createRequest(requestCreateParameters);
-        const confirmedRequest = await request.waitForConfirmation();
+        await request.waitForConfirmation();
         const requestData = request.getData();
-
+        if (!(await hasSufficientFunds(requestData, walletClient?.account.address || ''))) {
+            throw new Error('You do not have enough funds to pay this request');
+        }
+        if (!(await hasErc20Approval(requestData, walletClient?.account.address || ''))) {
+            const approvalTx = await approveErc20(requestData);
+            await approvalTx.wait(1);
+        }
+        console.log(requestData)
+        const tx = await payRequest(requestData);
+        await postMethod.validateTransaction(tx.hash, listingData.item_hash);
         toast({
             title: "Service Purchased",
             description: "You have successfully purchased this service",

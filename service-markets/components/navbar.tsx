@@ -22,6 +22,7 @@ import { Link } from "@chakra-ui/next-js";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect, useEnsName, useDisconnect } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
+import { goerli } from "viem/chains";
 
 const nothing = localFont({ src: '../public/fonts/Nothing/nothing.ttf' })
 
@@ -30,7 +31,7 @@ export default function Navbar() {
     const { address, isConnected } = useAccount()
     const ensName = useEnsName(address)
     const { connect } = useConnect({
-      connector: new InjectedConnector({ chains:['goerli'] }),
+      connector: new InjectedConnector({ chains:[goerli] }),
     })
     const { disconnect } = useDisconnect()
 

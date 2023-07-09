@@ -1,3 +1,6 @@
+import { id } from "ethers/lib/utils";
+import { API_URL } from ".";
+
 const Post = async (url:string, data:string) => {
     const response = await fetch(url, {
         method: "POST",
@@ -9,7 +12,10 @@ const Post = async (url:string, data:string) => {
 
 export const postMethod = {
     createComment: (id:string, address:string, data:string) => {
-        return Post(`http://localhost:8000/services/${id}/comments?comment=${data}&user_address=${address}`, '')
+        return Post(API_URL + `/services/${id}/comments?comment=${data}&user_address=${address}`, '')
+    },
+    validateTransaction: (txnHash: string, serviceId: string) => {
+        return Post(API_URL + `/services/validateTransaction?txn_hash=${txnHash}&service_id=${serviceId}`, '')
     }
 }
 
