@@ -4,6 +4,7 @@ import { Layout } from '@/components'
 import { WagmiConfig, createConfig, configureChains, mainnet } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { goerli } from 'wagmi/chains'
+import { InjectedConnector } from '@wagmi/core'
 
 const theme = extendTheme({
   styles: {
@@ -28,6 +29,7 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
 
 const config = createConfig({
   autoConnect: true,
+  connectors: [new InjectedConnector({ chains })],
   publicClient,
   webSocketPublicClient,
 })

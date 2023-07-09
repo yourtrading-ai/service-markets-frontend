@@ -4,6 +4,8 @@ import { getMethod } from "./get";
 import { postMethod } from "./post";
 import { putMethod } from "./put";
 
+const API_URL = "http://localhost:8000"
+
 export {
     mockListings,
     mockComments,
@@ -11,5 +13,6 @@ export {
     getRandomColorScheme,
     getMethod,
     postMethod,
-    putMethod
+    putMethod,
+    API_URL
 }

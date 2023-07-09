@@ -25,6 +25,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected'
 import { useRouter } from "next/router";
 import { postMethod } from "@/utils";
 import Cookies from "universal-cookie";
+import { goerli } from "viem/chains";
 import { SafeAuthKit, Web3AuthModalPack } from '@safe-global/auth-kit';
 import { Web3AuthOptions } from '@web3auth/modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
@@ -85,8 +86,9 @@ export default function Navbar() {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { address, isConnected } = useAccount()
     const [challenge, setChallenge] = useState("")
+    const ensName = useEnsName(address)
     const { connect } = useConnect({
-      connector: new InjectedConnector(),
+      connector: new InjectedConnector({ chains:[goerli] }),
     })
     const { disconnect } = useDisconnect()
 
