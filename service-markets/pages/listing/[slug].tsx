@@ -10,6 +10,16 @@ import { mockListings, mockComments } from "@/utils";
 import { useEffect, useState } from "react";
 import { postMethod, getMethod, putMethod} from '@/utils'
 import { useAccount } from 'wagmi'
+import { RequestNetwork } from "@requestnetwork/request-client.js";
+import { Web3SignatureProvider } from "@requestnetwork/web3-signature";
+import { useWalletClient } from "wagmi";
+import { Types, Utils } from "@requestnetwork/request-client.js";
+import {
+    approveErc20,
+    hasErc20Approval,
+    hasSufficientFunds,
+    payRequest,
+} from '@requestnetwork/payment-processor';
 
 export default function Listing() {
     const router = useRouter();
@@ -19,6 +29,7 @@ export default function Listing() {
     const [inputComment, setInputComment] = useState("");
     const toast = useToast();
     const { address, isConnecting, isDisconnected, isConnected } = useAccount()
+    const { data: walletClient } = useWalletClient();
 
     useEffect(() => {
         if (slug != undefined) {
@@ -39,11 +50,68 @@ export default function Listing() {
             getMethod.comments(listingData.item_hash).then((res) => {
                 setComments(res);
             })
-            console.log(listingData);
         }
     }, [listingData]);
 
-    const buyService = () => {
+    const buyService = async () => {
+        const signatureProvider = new Web3SignatureProvider(walletClient);
+        const requestClient = new RequestNetwork({
+            nodeConnectionConfig: {
+                baseURL: "https://goerli.gateway.request.network/",
+            },
+            signatureProvider,
+        });
+        const zeroAddress = '0x0000000000000000000000000000000000000000';
+        const payeeAddress = '0x91313eb16bb6fa6237E191670Bf953309639A028';
+        const requestCreateParameters: Types.ICreateRequestParameters = {
+          requestInfo: {
+            currency: {
+              type: Types.RequestLogic.CURRENCY.ERC20,
+              value: '0xBA62BCfcAaFc6622853cca2BE6Ac7d845BC0f2Dc',
+              network: 'goerli',
+            },
+            expectedAmount: listingData.price,
+            payee: {
+              type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+              value: payeeAddress,
+            },
+            payer: {
+              type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+              value: walletClient?.account.address || '',
+            },
+            timestamp: Utils.getCurrentTimestampInSecond(),
+          },
+          paymentNetwork: {
+            id: Types.Extension.PAYMENT_NETWORK_ID.ERC20_FEE_PROXY_CONTRACT,
+            parameters: {
+              paymentNetworkName: 'goerli',
+              paymentAddress: payeeAddress,
+              feeAddress: zeroAddress,
+              feeAmount: '0',
+            },
+          },
+          contentData: {
+            reason: listingData.item_hash,
+          },
+          signer: {
+            type: Types.Identity.TYPE.ETHEREUM_ADDRESS,
+            value: walletClient?.account.address || '',
+          },
+        };
+
+        const request = await requestClient.createRequest(requestCreateParameters);
+        await request.waitForConfirmation();
+        const requestData = request.getData();
+        if (!(await hasSufficientFunds(requestData, walletClient?.account.address || ''))) {
+            throw new Error('You do not have enough funds to pay this request');
+        }
+        if (!(await hasErc20Approval(requestData, walletClient?.account.address || ''))) {
+            const approvalTx = await approveErc20(requestData);
+            await approvalTx.wait(1);
+        }
+        console.log(requestData)
+        const tx = await payRequest(requestData);
+        await putMethod.validateTransaction(tx.hash, listingData.item_hash);
         toast({
             title: "Service Purchased",
             description: "You have successfully purchased this service",
@@ -55,7 +123,7 @@ export default function Listing() {
 
     const manageComment = () => {
         if (inputComment != "") {
-            postMethod.createComment(listingData.item_hash, address, inputComment).then((res) => {
+            postMethod.createComment(listingData.item_hash, address.toString(), inputComment).then((res) => {
                 toast({
                     title: "Comment Posted",
                     description: "Your comment has been posted",
@@ -105,10 +173,10 @@ export default function Listing() {
     return (
         <>
             <Head>
-            <title>{slug}</title>
-            <meta name="description" content="A Marketplace for all your service needs" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <link rel="icon" href="/favicon.ico" />
+                <title>{slug}</title>
+                <meta name="description" content="A Marketplace for all your service needs" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <link rel="icon" href="/favicon.ico" />
             </Head>
             <Flex className={styles.pageBody}>  
                 <div>
@@ -116,7 +184,7 @@ export default function Listing() {
                         listingData.name ? (
                             <Box>
                                  <Stack direction="row" spacing="8" px={4}>
-                                    <Image src={listingData.image_url ? "../skeletonImage.jpg" : listingData.image_url} alt={listingData.name} width={700}/>
+                                    <Image src={listingData.image_url == "" ? "../skeletonImage.jpg" : listingData.image_url} alt={listingData.name} width={700}/>
                                     <Flex direction="column" gap="4">
                                         <Flex>
                                             <Heading as="h3" size="xl">{listingData.name}</Heading>

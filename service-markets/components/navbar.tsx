@@ -25,6 +25,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected'
 import { useRouter } from "next/router";
 import { postMethod } from "@/utils";
 import Cookies from "universal-cookie";
+import { goerli } from "viem/chains";
 import { SafeAuthKit, Web3AuthModalPack } from '@safe-global/auth-kit';
 import { Web3AuthOptions } from '@web3auth/modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
@@ -195,7 +196,7 @@ export default function Navbar() {
         })
     }
 
-    const signChallenge = async (msg) => {
+    const signChallenge = async (msg:string) => {
         console.log("Signing Message")
         signMessageAuthKit(msg)
     }
