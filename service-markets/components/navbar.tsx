@@ -13,15 +13,14 @@ import {
     ModalCloseButton,
     useDisclosure,
     Button,
-    useToast
+    useToast,
+    Spinner
 } from "@chakra-ui/react";
 import { UserIcon } from "@/icons";
 import styles from './styles/Navbar.module.css'
 import localFont from 'next/font/local'
 import { Link } from "@chakra-ui/next-js";
 import { useEffect, useState } from "react";
-import { useAccount, useConnect, useEnsName, useDisconnect, useSignMessage } from 'wagmi'
-import { InjectedConnector } from 'wagmi/connectors/injected'
 import { useRouter } from "next/router";
 import { postMethod } from "@/utils";
 import Cookies from "universal-cookie";
@@ -91,19 +90,26 @@ export default function Navbar() {
     const [safeAuthSignInResponse, setSafeAuthSignInResponse] = useState<any>()
     const [eoa, setEoa] = useState<any>()
     const [ isConnected, setIsConnected ] = useState(false)
-    // const { connect } = useConnect({
-    //   connector: new InjectedConnector(),
-    // })
-    // const { disconnect } = useDisconnect()
 
-    // useEffect(() => {
-    //     connect()
-    //     if (isConnected) {
-    //         postMethod.challenge(address, "ETH").then((res) => {
-    //             setChallenge(res.challenge)
-    //         })
-    //     }
-    // }, [isConnected, address])
+    const toastSuccess = (title:string, content:string) => {
+        toast({
+            title: title,
+            description: content,
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+        })
+    }
+
+    const toastFail = (title:string, content:string) => {
+        toast({
+            title: title,
+            description: content,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+        })
+    }
 
     useEffect(() => {
         async function gnosisInit() {
@@ -126,6 +132,8 @@ export default function Navbar() {
             safeAuthKit.subscribe(ADAPTER_EVENTS.DISCONNECTED, () => {
                 console.log('User is not authenticated');
             });
+
+            gnosisConnect();
         }
     }, [safeAuthKit])
 
@@ -153,6 +161,8 @@ export default function Navbar() {
     const gnosisDisconnect = async () => {
         await safeAuthKit.signOut();
         setEoa(null)
+        setIsConnected(false)
+        toastFail("Disconnected", "You have been disconnected from your wallet")
     }
 
     const gnosisGetUserInfo = async () => {
@@ -182,14 +192,7 @@ export default function Navbar() {
                 cookies.set("bearerToken", res.token, {path: "/", maxAge: res.valid_til})
                 console.log("Bearer Token: " + cookies.get("bearerToken"))
                 onClose()
-                toast({
-                    title: "Authentication Successful",
-                    description: "You are now authenticated",
-                    status: "success",
-                    duration: 9000,
-                    isClosable: true,
-                })
-                
+                toastSuccess("Authentication Successful", "You have successfully authenticated with Gnosis Safe")
             } else {
                 console.log("Challenge Not Solved")
             }

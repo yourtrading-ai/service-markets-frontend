@@ -19,7 +19,10 @@ export default function Home() {
   useEffect(() => {
     getMethod.allListings().then((res) => {
       setListings(res);
-    })
+    }).catch((err) => {
+      console.log(err);
+    }
+    )
   }, [])
 
   return (
